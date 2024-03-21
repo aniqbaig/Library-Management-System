@@ -2,6 +2,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 
 public class Library {
     private ArrayList<Book> books;
@@ -12,47 +13,120 @@ public class Library {
         this.users = new ArrayList<>();
     }
 
-     /*Function that uses user arguments to create a new instance 
+    /*Function that uses user arguments to create a new instance 
     of the book class, store it in the arrayList and display a message on completion*/
-    public void AddBook(int BookId,String title,String author,String genre){
-        Book NewBook=new Book(BookId,title,author,genre,true);
-        books.add(NewBook);
-        System.out.println("New Book has been added Sucessfully.");
-        BufferedWriter filewriter=null;
-        try{
-          filewriter=new BufferedWriter(new FileWriter("Library Books.txt",true));
-         filewriter.write(NewBook.toString());
-         filewriter.write("\n");}
-         catch(IOException  e){
-            System.out.println("Error writing to file."+e.getMessage());
-         }finally{
-            if(filewriter!=null){
-                try{filewriter.close();}
-                catch(IOException e){
-                    System.err.println("Error in file handling"+e.getMessage());
-                }
-            }
-         }
+    public void AddBook(int bookId, String title, String author, String genre) {
+        try {
+            validateBookId(bookId);
+            validateTitle(title);
+            validateAuthor(author);
+            validateGenre(genre);
+
+            Book newBook = new Book(bookId, title, author, genre, true);
+            books.add(newBook);
+            System.out.println("New Book has been added Successfully.");
+            writeBookToFile(newBook);
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input format. Please enter a valid integer for Book ID.");
+        } catch (IllegalArgumentException | IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
-    // Method to add a new user to the library
-    public void addUser(User user) {
-        users.add(user);
-        System.out.println("New user added succesfully!");
+    private void validateBookId(int bookId) throws InputMismatchException {
+        if (bookId <= 0) {
+            throw new InputMismatchException("Book ID must be a positive integer.");
+        }
     }
+
+    private void validateTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty.");
+        }
+    }
+
+    private void validateAuthor(String author) {
+        if (author == null || author.trim().isEmpty()) {
+            throw new IllegalArgumentException("Author cannot be empty.");
+        }
+    }
+
+    private void validateGenre(String genre) {
+        if (genre == null || genre.trim().isEmpty()) {
+            throw new IllegalArgumentException("Genre cannot be empty.");
+        }
+    }
+
+    private void writeBookToFile(Book book) throws IOException {
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter("LibraryBooks.txt", true))) {
+            fileWriter.write(book.toString());
+            fileWriter.newLine();
+        }
+    }
+
+
+    // method to add a user
+    public void addUser(User user) {
+        try {
+            // Check if the provided user object is null
+            if (user == null) {
+                throw new IllegalArgumentException("User object is null. Cannot add null user.");
+            }
+
+            // Check if the user ID is negative
+            if (user.getUserID() < 0) {
+                throw new IllegalArgumentException("User ID cannot be negative.");
+            }
+
+            // Check if the user ID is not a number
+            if (!isNumeric(String.valueOf(user.getUserID()))) {
+                throw new IllegalArgumentException("User ID must be a number.");
+            }
+
+            // Check if the user already exists in the library
+            if (users.contains(user)) {
+                throw new IllegalArgumentException("User already exists in the library.");
+            }
+
+            // Add the user to the library
+            users.add(user);
+            System.out.println("New user added successfully!");
+            } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+// Helper method to check if a string is numeric
+private boolean isNumeric(String str) {
+    return str.matches("-?\\d+(\\.\\d+)?");
+}
 
     // Method to check out a book to a user
     public void checkOutBook(int bookID, int userID) {
-        Book book = findBookByID(bookID);
-        User user = findUserByID(userID);
+    // Find the book and user
+    Book book = findBookByID(bookID);
+    User user = findUserByID(userID);
 
-        if (book != null && user != null && book.isAvailable()) {
-            user.getBorrowedBooks().add(book);
-            book.setAvailable(false);
-            System.out.println("Book successfully checked out.");
-        } else {
-            System.out.println("Book not available or user not found.");
-        }
+    // Check if the book and user exist
+    if (book == null) {
+        System.out.println("Error: Book not found.");
+        return;
+    }
+    if (user == null) {
+        System.out.println("Error: User not found.");
+        return;
+    }
+
+    // Check if the book is available
+    if (!book.isAvailable()) {
+        System.out.println("Error: Book is not available for checkout.");
+        return;
+    }
+
+    // Add the book to the user's borrowed books and mark it as unavailable
+    user.getBorrowedBooks().add(book);
+    book.setAvailable(false);
+    System.out.println("Book successfully checked out.");
     }
 
     // Method to return a book to the library
@@ -71,10 +145,21 @@ public class Library {
 
     // Method to search for books by title or author
     public void searchBooks(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            System.out.println("Error: Search keyword cannot be empty.");
+            return;
+        }
+
+        boolean found = false;
         for (Book book : books) {
             if (book.getTitle().equalsIgnoreCase(keyword) || book.getAuthor().equalsIgnoreCase(keyword)) {
                 System.out.println(book);
+                found = true;
             }
+        }
+    
+        if (!found) {
+            System.out.println("No books found matching the search keyword: " + keyword);
         }
     }
 
