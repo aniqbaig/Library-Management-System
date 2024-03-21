@@ -1,0 +1,7 @@
+Book ID: 112, Title: Harry Potter and the Philospher's Stone, Author: J.K Rowling, Genre: Fantasy, Available: true
+Book ID: 113, Title: An Ember in The Ashes, Author: Sabaa Tahir, Genre: Fantasy, Available: true
+Book ID: 115, Title: A Torch Against the Night, Author: Sabaa Tahir, Genre: Fantasy, Available: true
+Book ID: 114, Title: Six of Crows, Author: Leigh Bardugo, Genre: Fantasy, Available: true
+Book ID: 117, Title: Atomic Habits, Author: James Clear, Genre: Self Help, Available: true
+Book ID: 118, Title: Letters to Milena, Author: Franz Kafka, Genre: Romance, Available: true
+Book ID: 119, Title: Reaper at The Gates, Author: Sabaa Tahir, Genre: Fantasy, Available: true
